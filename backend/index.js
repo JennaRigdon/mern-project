@@ -24,6 +24,8 @@ mongoose.connect("mongodb://localhost:27017/mern_project", {
 
 // API Routes
 app.use("/api/meetings", require("./routes/meetings"));
+app.use("/api/clubs", require("./routes/clubs"));
+app.use("/api/rooms", require("./routes/rooms"));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
