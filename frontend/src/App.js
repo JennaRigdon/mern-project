@@ -120,8 +120,8 @@ function App() {
       <ul>
       {meetings.map(meeting => (
         <li key={meeting._id}>
-          {meeting.title} - {meeting.date ? new Date(meeting.date).toLocaleDateString() : "Invalid Date"} at {meeting.time}
-        </li>
+        {meeting.title} - {new Date(meeting.date).toLocaleDateString('en-US', { timeZone: 'UTC' })} at {meeting.time}
+      </li>
       ))}
     </ul>
 
