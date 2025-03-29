@@ -8,11 +8,19 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
+const MONGO_URI = "mongodb://localhost:27017";
+
+
+if (!MONGO_URI) {
+  console.error("Error: MONGO_URI is not defined. Check your .env file.");
+  process.exit(1); // Stop execution if no URI is found
+}
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("Error connecting to MongoDB:", err));
+mongoose.connect("mongodb://localhost:27017/mern_project", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // API Routes
 app.use("/api/meetings", require("./routes/meetings"));
