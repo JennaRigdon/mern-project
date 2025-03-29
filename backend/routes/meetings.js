@@ -18,21 +18,18 @@ router.get("/", async (req, res) => {
 // ✅ Filter meetings based on club, room, and date range
 router.get("/filter", async (req, res) => {
   try {
-    const { club, room, startDate, endDate } = req.query;
+    const { club, room, startDate } = req.query;
     let query = {};
 
-    // ✅ Ensure `club_id` and `room_id` are properly converted to ObjectId
     if (club) query.club_id = new mongoose.Types.ObjectId(club);
     if (room) query.room_id = new mongoose.Types.ObjectId(room);
 
-    // ✅ Convert `startDate` and `endDate` to proper `ISODate`
-    if (startDate && endDate) {
-      query.date = {
-        $gte: new Date(startDate),
-        $lt: new Date(endDate),
-      };
-    } else if (startDate) {
-      query.date = { $gte: new Date(startDate) };
+    if (startDate) {
+      const start = new Date(startDate);
+      const end = new Date(startDate);
+      end.setUTCHours(23, 59, 59, 999);  // Set to end of the day
+
+      query.date = { $gte: start, $lt: end };
     }
 
     console.log("🚀 Querying with:", JSON.stringify(query, null, 2));
@@ -46,6 +43,7 @@ router.get("/filter", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ✅ Add a new meeting
 router.post("/", async (req, res) => {
