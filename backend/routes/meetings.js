@@ -45,40 +45,66 @@ router.get("/filter", async (req, res) => {
 });
 
 
-// ✅ Add a new meeting
 router.post("/", async (req, res) => {
   try {
-    const { title, date, time, duration, description, club_id, room_id, invitedCount, acceptedCount } = req.body;
-
     const newMeeting = new Meeting({
-      title,
-      date: new Date(date), // Ensure date is stored as `ISODate`
-      time,
-      duration,
-      description,
-      club_id: new mongoose.Types.ObjectId(club_id),
-      room_id: new mongoose.Types.ObjectId(room_id),
-      invitedCount,
-      acceptedCount,
+      title: req.body.title,
+      date: new Date(req.body.date),       // Store date as ISODate
+      time: req.body.time,
+      duration: req.body.duration,
+      description: req.body.description,
+      club_id: new mongoose.Types.ObjectId(req.body.club_id), // Convert to ObjectId
+      room_id: new mongoose.Types.ObjectId(req.body.room_id), // Convert to ObjectId
+      invitedCount: req.body.invitedCount,
+      acceptedCount: req.body.acceptedCount,
     });
-
     const savedMeeting = await newMeeting.save();
-    res.json(savedMeeting);
+    res.status(201).json(savedMeeting);
   } catch (err) {
-    console.error("❌ Error adding meeting:", err);
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
   }
 });
+
 
 // ✅ Delete a meeting by ID
 router.delete("/:id", async (req, res) => {
   try {
-    await Meeting.findByIdAndDelete(req.params.id);
+    const deletedMeeting = await Meeting.findByIdAndDelete(req.params.id);
+    if (!deletedMeeting) {
+      return res.status(404).json({ message: "Meeting not found" });
+    }
     res.json({ message: "Meeting deleted successfully" });
-  } catch (err) {
-    console.error("❌ Error deleting meeting:", err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
+
+
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedMeeting = await Meeting.findByIdAndUpdate(
+      req.params.id,
+      {
+        title: req.body.title,
+        date: new Date(req.body.date), // Ensure proper date format
+        time: req.body.time,
+        duration: req.body.duration,
+        description: req.body.description,
+        club_id: new mongoose.Types.ObjectId(req.body.club_id),
+        room_id: new mongoose.Types.ObjectId(req.body.room_id),
+        invitedCount: req.body.invitedCount,
+        acceptedCount: req.body.acceptedCount,
+      },
+      { new: true }
+    );
+    if (!updatedMeeting) {
+      return res.status(404).json({ message: "Meeting not found" });
+    }
+    res.json(updatedMeeting);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 
 module.exports = router;
