@@ -18,11 +18,11 @@ router.get("/", async (req, res) => {
 // ✅ Filter meetings based on club, room, and date range
 router.get("/filter", async (req, res) => {
   try {
-    const { club, room, startDate } = req.query;
+    const { club_id, room_id, startDate } = req.query;
     let query = {};
 
-    if (club) query.club_id = new mongoose.Types.ObjectId(club);
-    if (room) query.room_id = new mongoose.Types.ObjectId(room);
+    if (club_id) query.club_id = new mongoose.Types.ObjectId(club_id);
+    if (room_id) query.room_id = new mongoose.Types.ObjectId(room_id);
 
     if (startDate) {
       const start = new Date(startDate);
