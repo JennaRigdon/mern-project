@@ -19,9 +19,19 @@ function App() {
   const [description, setDescription] = useState("");
   const [club, setClub] = useState("");  // For the form
   const [room, setRoom] = useState("");  // For the form
+  const [duration, setDuration] = useState("");
+  const [invitedCount, setInvitedCount] = useState("");
+  const [acceptedCount, setAcceptedCount] = useState("");
 
   // State to track if we're editing an existing meeting
   const [editingMeeting, setEditingMeeting] = useState(null);
+
+  const [stats, setStats] = useState({
+    avgDuration: 0,
+    avgInvited: 0,
+    avgAccepted: 0,
+    attendanceRate: 0,
+  });
 
   useEffect(() => {
     fetchMeetings();
@@ -72,9 +82,12 @@ function App() {
           endDate: formattedEndDate,
         },
       });
+      console.log("start:", formattedStartDate);
+      console.log("end:", formattedEndDate);
 
       console.log("📌 Filtered API Response:", response.data);
-      setMeetings(response.data);
+      setMeetings(response.data.meetings);
+      setStats(response.data.stats);
     } catch (error) {
       console.error("❌ Error filtering meetings:", error);
     }
@@ -89,6 +102,9 @@ function App() {
       description,
       club_id: club,  // using 'club' from the form
       room_id: room,  // using 'room' from the form
+      duration: Number(duration),
+      invitedCount: Number(invitedCount),
+      acceptedCount: Number(acceptedCount),
     };
     console.log("Adding meeting with payload:", payload);
     try {
@@ -102,6 +118,9 @@ function App() {
       setDescription("");
       setClub("");
       setRoom("");
+      setDuration("");
+      setInvitedCount("");
+      setAcceptedCount("");
       setEditingMeeting(null);
     } catch (error) {
       console.error("Error adding meeting:", error.response ? error.response.data : error);
@@ -138,6 +157,9 @@ function App() {
       description,
       club_id: club,
       room_id: room,
+      duration: Number(duration),
+      invitedCount: Number(invitedCount),
+      acceptedCount: Number(acceptedCount),
     };
     console.log("Updating meeting with payload:", payload);
     try {
@@ -155,6 +177,9 @@ function App() {
       setDescription("");
       setClub("");
       setRoom("");
+      setDuration("");
+      setInvitedCount("");
+      setAcceptedCount("");
     } catch (error) {
       console.error("Error updating meeting:", error.response ? error.response.data : error);
     }
@@ -202,6 +227,21 @@ function App() {
 
         <button onClick={filterMeetings}>Filter Meetings</button>
       </div>
+
+      {/* Statistics Section */}
+      <div>
+      <h3>Statistics</h3>
+      {stats ? (
+        <>
+          <p>Average Duration: {stats.avgDuration?.toFixed(2)}</p>
+          <p>Average Invited: {stats.avgInvited?.toFixed(2)}</p>
+          <p>Average Accepted: {stats.avgAccepted?.toFixed(2)}</p>
+          <p>Attendance Rate: {(stats.attendanceRate * 100)?.toFixed(2)}%</p>
+        </>
+      ) : (
+        <p>No stats available</p>
+      )}
+    </div>
 
       {/* Meeting List */}
       <ul>
@@ -287,6 +327,41 @@ function App() {
             ))}
           </select>
         </div>
+
+        {/* New Fields for the Meeting */}
+        <div>
+          <label>Duration (min):</label>
+          <input
+            type="number"
+            placeholder="Duration"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Invited Count:</label>
+          <input
+            type="number"
+            placeholder="Invited Count"
+            value={invitedCount}
+            onChange={(e) => setInvitedCount(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label>Accepted Count:</label>
+          <input
+            type="number"
+            placeholder="Accepted Count"
+            value={acceptedCount}
+            onChange={(e) => setAcceptedCount(e.target.value)}
+            required
+          />
+        </div>
+
 
         <button type="submit">
           {editingMeeting ? "Update Meeting" : "Add Meeting"}

@@ -37,7 +37,38 @@ router.get("/filter", async (req, res) => {
     const meetings = await Meeting.find(query);
     console.log("📌 Filtered results:", meetings);
 
-    res.json(meetings);
+    const statsResult = await Meeting.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          avgDuration: { $avg: "$duration" },
+          avgInvited: { $avg: "$invitedCount" },
+          avgAccepted: { $avg: "$acceptedCount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          avgDuration: 1,
+          avgInvited: 1,
+          avgAccepted: 1,
+          attendanceRate: {
+            $cond: [
+              { $eq: ["$avgInvited", 0] },
+              0,
+              { $divide: ["$avgAccepted", "$avgInvited"] },
+            ],
+          },
+        },
+      },
+    ]);
+
+    // If there are no stats, set it to null
+    const stats = statsResult.length > 0 ? statsResult[0] : null;
+
+    res.json({ meetings, stats });
+    //res.json(meetings);
   } catch (err) {
     console.error("❌ Query Error:", err);
     res.status(500).json({ error: err.message });
